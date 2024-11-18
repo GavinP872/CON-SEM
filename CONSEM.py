@@ -3,6 +3,7 @@ from tkinter import messagebox, PhotoImage
 from PIL import ImageTk, Image
 from datetime import datetime
 from chat_functions import send_message, start_receiving
+from demoMessage import MessagingApp  # Import the MessagingApp class
 
 # Usernames and Passwords
 admin_USERNAME = ["gavin", "jose", "benedict", "emmett", " "]
@@ -27,42 +28,85 @@ def open_menu(username):
     login_window.destroy()
     window.deiconify()
 
+
 # Main application window setup (fullscreen)
-window = tk.Tk()
-window.title("CON-SEM v1.0.0.0")
-window.iconbitmap("IMG_SRC/ICONIC.ico")
-window.attributes('-fullscreen', True)
-window.withdraw()  # Hide until login is successful
+window = tk.Tk()  
+window.title("CON-SEM v1.0.0.0") 
+window.iconbitmap("IMG_SRC/ICONIC.ico") 
+window.attributes('-fullscreen', True)  
+window.withdraw()  # Hide the window initially until login is successful
 
-# Handle application close when close button is pressed
-def handle_close(event):
-    window.destroy()
+# Function to handle application close when close button is pressed
+def handle_button_press(event):
+    window.destroy()  # Close the main window
 
+# Function to open the MessagingApp when admin button is pressed
+def handle_admin_button_press(event):
+    admin_window = tk.Toplevel(window)
+    admin_window.title("Admin Messaging App")
+    admin_window.state("zoomed")
+
+    # Initialize the MessagingApp inside the new window
+    app = MessagingApp(admin_window)
+
+
+# Open chat window
+def open_chat_window():
+    chat_window = tk.Toplevel(window)
+    chat_window.title("Chat")
+    chat_window.geometry("400x500")
+
+    # Chat message display
+    global chat_display
+    chat_display = tk.Text(chat_window, state="disabled", wrap="word")
+    chat_display.pack(padx=10, pady=10, fill=tk.BOTH, expand=True)
+
+    # Message entry field
+    message_entry = tk.Entry(chat_window, width=50)
+    message_entry.pack(pady=5, padx=10)
+
+    # Send message with timestamp
+    def on_send_click():
+        message = message_entry.get().strip()
+        if message:
+            send_message(message)
+            display_message(f"You: {message}")
+            message_entry.delete(0, tk.END)
+
+    # Display message function
+    def display_message(message):
+        timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        chat_display.config(state="normal")
+        chat_display.insert(tk.END, f"[{timestamp}] {message}\n")
+        chat_display.config(state="disabled")
+        chat_display.see(tk.END)
+
+    # Send button
+    send_button = tk.Button(chat_window, text="Send", command=on_send_click)
+    send_button.pack(pady=5)
+
+    # Start receiving messages from server
+    start_receiving(display_message)
+
+
+    
 # Open Twitter window
-# Open Twitter window
-def open_twitter():
-    twitter_window = tk.Toplevel(window)
-    twitter_window.title("Twitter Consem Main Page")
-    twitter_window.state('zoomed')
-    twitter_window.configure(bg="#f5f8fa")
+def handle_twitter_button_press(event):
+    twitter_window = tk.Toplevel(window)  # Create a new window for Twitter 
+    twitter_window.title("Twitter Consem Main Page")  
+    twitter_window.state('zoomed')  
+    twitter_window.configure(bg="#f5f8fa") 
 
-    # Navigation Bar
-    nav_bar = tk.Frame(twitter_window, height=50, bg="#1DA1F2")
-    nav_bar.pack(fill=tk.X)
-
-    nav_label = tk.Label(nav_bar, text="Twitter", font=("Arial", 20), fg="white", bg="#1DA1F2")
-    nav_label.pack(side=tk.LEFT, padx=20)
-
-    # Main Twitter Feed Area
-    feed_frame = tk.Frame(twitter_window, bg="white")
-    feed_frame.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
-
-    tk.Label(feed_frame, text="Home Feed", font=("Arial", 16), bg="white").pack(anchor="nw", pady=10, padx=10)
-
+    # Placeholder data for tweets and friends list
     tweets = [
         {'user': 'Jose', 'handle': '@jose', 'tweet': 'Hello', 'time': '10m'},
         {'user': 'Emmett', 'handle': '@emmett', 'tweet': 'Hey!', 'time': '20m'},
     ]
+    friends = ["Friend1", "Friend2", "Friend3"]  # Example friends list
+
+    # Function for buttons with no features yet
+    def placeholder_action():
+        messagebox.showinfo("Info", "This feature is not yet implemented!")
 
     # Function to handle posting a new tweet
     def post_tweet():
@@ -111,11 +155,7 @@ def open_twitter():
             
             tk.Button(interaction_frame, image=like_icon, bg="#e8f5fd", relief="flat", command=placeholder_action).pack(side=tk.LEFT, padx=5)
             tk.Button(interaction_frame, image=reply_icon, bg="#e8f5fd", relief="flat", command=placeholder_action).pack(side=tk.LEFT, padx=5)
-
-    # Function for buttons with no features yet
-    def placeholder_action():
-        messagebox.showinfo("Info", "This feature is not yet implemented!")
-
+            
     # Load images for avatar and interaction buttons
     global avatar_image, like_icon, reply_icon
     try:
@@ -182,65 +222,26 @@ def open_twitter():
     feed_content = scrollable_frame  # Frame to contain tweets
 
     # Friends list on the right side
-    friends_list = tk.Frame(main_content, bg="#f5f8fa", width=250, height=650)
-    friends_list.pack_propagate(False)
-    friends_list.pack(side=tk.RIGHT, padx=10, pady=10)
+    friends_frame = tk.Frame(twitter_window, bg="#8eccf5")
+    friends_frame.place(relx=0.8, rely=0.1555, relwidth=0.2, relheight=1.0)
 
-    tk.Label(friends_list, text="Friends", font=("Arial", 16), bg="#f5f8fa").pack(anchor="nw", pady=10, padx=10)
-    
-    friends = ["User1", "User2", "User3", "User4", "User5"]
+    friends_label = tk.Label(friends_frame, text="Friends List", font=("Chirp", 14), bg="#8eccf5")
+    friends_label.pack(anchor="w", pady=5, padx=10)
+
+    # Display friends in the friends list
     for friend in friends:
-        tk.Label(friends_list, text=friend, font=("Arial", 12), bg="#f5f8fa").pack(anchor="w", pady=5, padx=10)
+        friend_button = tk.Button(friends_frame, text=friend, bg="#1da1f2", fg="white", font=("Chirp", 10),
+                                  relief="flat", command=lambda f=friend: placeholder_action())
+        friend_button.pack(fill=tk.X, padx=10, pady=5)
 
-    # Initial feed refresh
-    refresh_feed()
-
-# Placeholder for profile/home/notifications buttons
-#profile_icon = home_icon = notifications_icon = title_image = PhotoImage(file="IMG_SRC/default_icon.png")
-
-
-
-# Open chat window
-def open_chat_window():
-    chat_window = tk.Toplevel(window)
-    chat_window.title("Chat")
-    chat_window.geometry("400x500")
-
-    # Chat message display
-    global chat_display
-    chat_display = tk.Text(chat_window, state="disabled", wrap="word")
-    chat_display.pack(padx=10, pady=10, fill=tk.BOTH, expand=True)
-
-    # Message entry field
-    message_entry = tk.Entry(chat_window, width=50)
-    message_entry.pack(pady=5, padx=10)
-
-    # Send message with timestamp
-    def on_send_click():
-        message = message_entry.get().strip()
-        if message:
-            send_message(message)
-            display_message(f"You: {message}")
-            message_entry.delete(0, tk.END)
-
-    # Display message function
-    def display_message(message):
-        timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-        chat_display.config(state="normal")
-        chat_display.insert(tk.END, f"[{timestamp}] {message}\n")
-        chat_display.config(state="disabled")
-        chat_display.see(tk.END)
-
-    # Send button
-    send_button = tk.Button(chat_window, text="Send", command=on_send_click)
-    send_button.pack(pady=5)
-
-    # Start receiving messages from server
-    start_receiving(display_message)
+    refresh_feed()  # Initial feed display
 
 # Load images for main window icons
+DesktopImage = ImageTk.PhotoImage(Image.open("IMG_SRC/102237.jpg"))
+panel = tk.Label(window, image=DesktopImage)
+panel.pack(side="bottom", fill="both", expand="yes")
+
 try:
-    DesktopImage = ImageTk.PhotoImage(Image.open("IMG_SRC/102237.jpg"))
     twitterIcon = PhotoImage(file="IMG_SRC/TWIT.png")
     chatIcon = PhotoImage(file="IMG_SRC/CHAT.png")
     adminToolIcon = PhotoImage(file="IMG_SRC/TOOL.png")
@@ -252,13 +253,9 @@ try:
 except tk.TclError as e:
     messagebox.showerror("Image Load Error", f"Failed to load an image: {e}")
 
-# Display main background image
-panel = tk.Label(window, image=DesktopImage)
-panel.pack(side="bottom", fill="both", expand="yes")
-
 # Twitter button setup
 twitter_button = tk.Button(window, text=" ", image=twitterIcon)
-twitter_button.bind("<Button-1>", lambda e: open_twitter())
+twitter_button.bind("<Button-1>", handle_twitter_button_press)
 twitter_button.place(x=50, y=50, width=150, height=150)
 
 # Chat button setup
@@ -268,33 +265,38 @@ chat_button.place(x=50, y=250, width=150, height=150)
 
 # Admin tools button setup
 admin_button = tk.Button(window, text=" ", image=adminToolIcon)
-admin_button.bind("<Button-1>", lambda e: messagebox.showinfo("Admin", "Admin Tools Placeholder"))
+admin_button.bind("<Button-1>", handle_admin_button_press)
 admin_button.place(x=50, y=450, width=150, height=150)
 
 # Close button setup
 close_button = tk.Button(window, text=" ", image=xbutton)
-close_button.bind("<Button-1>", handle_close)
+close_button.bind("<Button-1>", handle_button_press)
 close_button.place(x=1500, y=0, width=37, height=37)
 
-# Login screen setup
+# Main login window setup
 login_window = tk.Tk()
-login_window.attributes('-topmost', 1)
-login_window.resizable(False, False)
-login_window.title("Login Screen")
-login_window.geometry("500x200+500+100")
-login_window.iconbitmap("IMG_SRC/ICONIC.ico")
+login_window.attributes('-topmost', 1)  
+login_window.resizable(False, False)  
+login_window.title("Login Screen")  
 
-# Username and password entry
+login_window.geometry("500x200+500+100")  # Set size and position of login window
+login_window.iconbitmap("IMG_SRC/ICONIC.ico")  # Set icon for login window
+
+# Username input field
 tk.Label(login_window, text="Username").pack(pady=5)
 entry_username = tk.Entry(login_window)
 entry_username.pack(pady=5)
 
+# Password input field
 tk.Label(login_window, text="Password").pack(pady=5)
-entry_password = tk.Entry(login_window, show="*")
+entry_password = tk.Entry(login_window, show="*")  # Use '*' to hide password input
 entry_password.pack(pady=5)
 
 # Login button
 tk.Button(login_window, text="Login", command=validate_login).pack(pady=20)
+
+
+
 
 # Start the GUI event loop
 login_window.mainloop()
