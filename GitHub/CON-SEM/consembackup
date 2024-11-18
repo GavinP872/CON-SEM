@@ -1,0 +1,174 @@
+import tkinter as tk
+from tkinter import messagebox, PhotoImage
+from PIL import ImageTk, Image
+from datetime import datetime
+from chat_functions import send_message, start_receiving
+
+# Usernames and Passwords
+admin_USERNAME = ["gavin", "jose", "benedict", "emmett", " "]
+admin_PASSWORD = ["gavin1", "jose1", "benedict1", "emmett1", " "]
+
+# Validate login
+def validate_login():
+    username = entry_username.get()
+    password = entry_password.get()
+
+    if username in admin_USERNAME and password in admin_PASSWORD:
+        user_index = admin_USERNAME.index(username)
+        if admin_PASSWORD[user_index] == password:
+            open_menu(username)
+        else:
+            messagebox.showerror("Error", "Invalid username or password")
+    else:
+        messagebox.showerror("Error", "Invalid username or password")
+
+# Function to open the main application menu after successful login
+def open_menu(username):
+    login_window.destroy()
+    window.deiconify()
+
+# Main application window setup (fullscreen)
+window = tk.Tk()
+window.title("CON-SEM v1.0.0.0")
+window.iconbitmap("IMG_SRC/ICONIC.ico")
+window.attributes('-fullscreen', True)
+window.withdraw()  # Hide until login is successful
+
+# Handle application close when close button is pressed
+def handle_close(event):
+    window.destroy()
+
+# Open Twitter window
+def open_twitter():
+    twitter_window = tk.Toplevel(window)
+    twitter_window.title("Twitter Consem Main Page")
+    twitter_window.state('zoomed')
+    twitter_window.configure(bg="#f5f8fa")
+
+    # Navigation Bar
+    nav_bar = tk.Frame(twitter_window, height=50, bg="#1DA1F2")
+    nav_bar.pack(fill=tk.X)
+
+    nav_label = tk.Label(nav_bar, text="Twitter", font=("Arial", 20), fg="white", bg="#1DA1F2")
+    nav_label.pack(side=tk.LEFT, padx=20)
+
+    # Main Twitter Feed Area
+    feed_frame = tk.Frame(twitter_window, bg="white")
+    feed_frame.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
+
+    tk.Label(feed_frame, text="Home Feed", font=("Arial", 16), bg="white").pack(anchor="nw", pady=10, padx=10)
+
+    # Sample tweet for demonstration
+    tweet_label = tk.Label(feed_frame, text="Welcome to Consem Twitter Page!", font=("Arial", 12), bg="white", wraplength=400)
+    tweet_label.pack(anchor="nw", padx=10, pady=5)
+
+    # Friends List Area
+    friends_frame = tk.Frame(twitter_window, width=200, bg="#e1e8ed")
+    friends_frame.pack(side=tk.RIGHT, fill=tk.Y)
+
+    tk.Label(friends_frame, text="Friends", font=("Arial", 16), bg="#e1e8ed").pack(anchor="n", pady=10)
+
+    # Example friend list items
+    friend_label = tk.Label(friends_frame, text="Friend 1", font=("Arial", 12), bg="#e1e8ed")
+    friend_label.pack(anchor="n", pady=2)
+    friend_label2 = tk.Label(friends_frame, text="Friend 2", font=("Arial", 12), bg="#e1e8ed")
+    friend_label2.pack(anchor="n", pady=2)
+
+# Open chat window
+def open_chat_window():
+    chat_window = tk.Toplevel(window)
+    chat_window.title("Chat")
+    chat_window.geometry("400x500")
+
+    # Chat message display
+    global chat_display
+    chat_display = tk.Text(chat_window, state="disabled", wrap="word")
+    chat_display.pack(padx=10, pady=10, fill=tk.BOTH, expand=True)
+
+    # Message entry field
+    message_entry = tk.Entry(chat_window, width=50)
+    message_entry.pack(pady=5, padx=10)
+
+    # Send message with timestamp
+    def on_send_click():
+        message = message_entry.get().strip()
+        if message:
+            send_message(message)
+            display_message(f"You: {message}")
+            message_entry.delete(0, tk.END)
+
+    # Display message function
+    def display_message(message):
+        timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        chat_display.config(state="normal")
+        chat_display.insert(tk.END, f"[{timestamp}] {message}\n")
+        chat_display.config(state="disabled")
+        chat_display.see(tk.END)
+
+    # Send button
+    send_button = tk.Button(chat_window, text="Send", command=on_send_click)
+    send_button.pack(pady=5)
+
+    # Start receiving messages from server
+    start_receiving(display_message)
+
+# Load images for main window icons
+try:
+    DesktopImage = ImageTk.PhotoImage(Image.open("IMG_SRC/102237.jpg"))
+    twitterIcon = PhotoImage(file="IMG_SRC/TWIT.png")
+    chatIcon = PhotoImage(file="IMG_SRC/CHAT.png")
+    adminToolIcon = PhotoImage(file="IMG_SRC/TOOL.png")
+    xbutton = PhotoImage(file="IMG_SRC/x.png")
+    profile_icon = PhotoImage(file="IMG_SRC/profile_icon.png")
+    home_icon = PhotoImage(file="IMG_SRC/home_icon.png")
+    notifications_icon = PhotoImage(file="IMG_SRC/notifications_icon.png")
+    title_image = PhotoImage(file="IMG_SRC/TwConsem_title.png")
+except tk.TclError as e:
+    messagebox.showerror("Image Load Error", f"Failed to load an image: {e}")
+
+# Display main background image
+panel = tk.Label(window, image=DesktopImage)
+panel.pack(side="bottom", fill="both", expand="yes")
+
+# Twitter button setup
+twitter_button = tk.Button(window, text=" ", image=twitterIcon)
+twitter_button.bind("<Button-1>", lambda e: open_twitter())
+twitter_button.place(x=50, y=50, width=150, height=150)
+
+# Chat button setup
+chat_button = tk.Button(window, text=" ", image=chatIcon)
+chat_button.bind("<Button-1>", lambda e: open_chat_window())
+chat_button.place(x=50, y=250, width=150, height=150)
+
+# Admin tools button setup
+admin_button = tk.Button(window, text=" ", image=adminToolIcon)
+admin_button.bind("<Button-1>", lambda e: messagebox.showinfo("Admin", "Admin Tools Placeholder"))
+admin_button.place(x=50, y=450, width=150, height=150)
+
+# Close button setup
+close_button = tk.Button(window, text=" ", image=xbutton)
+close_button.bind("<Button-1>", handle_close)
+close_button.place(x=1500, y=0, width=37, height=37)
+
+# Login screen setup
+login_window = tk.Tk()
+login_window.attributes('-topmost', 1)
+login_window.resizable(False, False)
+login_window.title("Login Screen")
+login_window.geometry("500x200+500+100")
+login_window.iconbitmap("IMG_SRC/ICONIC.ico")
+
+# Username and password entry
+tk.Label(login_window, text="Username").pack(pady=5)
+entry_username = tk.Entry(login_window)
+entry_username.pack(pady=5)
+
+tk.Label(login_window, text="Password").pack(pady=5)
+entry_password = tk.Entry(login_window, show="*")
+entry_password.pack(pady=5)
+
+# Login button
+tk.Button(login_window, text="Login", command=validate_login).pack(pady=20)
+
+# Start the GUI event loop
+login_window.mainloop()
