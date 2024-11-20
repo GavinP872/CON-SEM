@@ -2,7 +2,7 @@ import tkinter as tk
 from tkinter import messagebox, PhotoImage
 from PIL import ImageTk, Image
 from datetime import datetime
-from chat_functions import send_message, start_receiving
+from chat_functions import send_message, start_receiving, create_client
 from demoMessage import MessagingApp  # Import the MessagingApp class
 
 # Usernames and Passwords
@@ -50,24 +50,23 @@ def handle_admin_button_press(event):
     app = MessagingApp(admin_window)
 
 def open_chat_window():
+    # Create a new chat window
     chat_window = tk.Toplevel(window)
     chat_window.title("Chat")
     chat_window.geometry("400x500")
 
-    global chat_display
+    # Initialize a new client for this chat window
+    client = create_client()
+
+    # Chat display
     chat_display = tk.Text(chat_window, state="disabled", wrap="word")
     chat_display.pack(padx=10, pady=10, fill=tk.BOTH, expand=True)
 
+    # Input message box
     message_entry = tk.Entry(chat_window, width=50)
     message_entry.pack(pady=5, padx=10)
 
-    def on_send_click():
-        message = message_entry.get().strip()
-        if message:
-            send_message(message)
-            display_message(f"You: {message}")
-            message_entry.delete(0, tk.END)
-
+    # Function to update chat display with new messages
     def display_message(message):
         timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         chat_display.config(state="normal")
@@ -75,11 +74,20 @@ def open_chat_window():
         chat_display.config(state="disabled")
         chat_display.see(tk.END)
 
+    # Function to send a message
+    def on_send_click():
+        message = message_entry.get().strip()
+        if message:
+            send_message(client, message)  # Send the message via this user's client
+            display_message(f"You: {message}")  # Display sent message in chat
+            message_entry.delete(0, tk.END)
+
+    # Send button
     send_button = tk.Button(chat_window, text="Send", command=on_send_click)
     send_button.pack(pady=5)
 
-    # Listen for messages from the server and display them
-    start_receiving(display_message)
+    # Start receiving messages for this user's client
+    start_receiving(client, display_message)
 
 
 

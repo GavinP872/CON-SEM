@@ -17,7 +17,7 @@ def handle_client(client_socket, client_address):
             # Receive message from client
             message = client_socket.recv(1024).decode('utf-8')
             if message:
-                print(f"Received: {message}")
+                print(f"Received (server): {message}")
                 # Broadcast the message to other connected clients
                 broadcast(message, client_socket)
             else:
