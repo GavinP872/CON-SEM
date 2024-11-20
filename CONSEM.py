@@ -49,23 +49,18 @@ def handle_admin_button_press(event):
     # Initialize the MessagingApp inside the new window
     app = MessagingApp(admin_window)
 
-
-# Open chat window
 def open_chat_window():
     chat_window = tk.Toplevel(window)
     chat_window.title("Chat")
     chat_window.geometry("400x500")
 
-    # Chat message display
     global chat_display
     chat_display = tk.Text(chat_window, state="disabled", wrap="word")
     chat_display.pack(padx=10, pady=10, fill=tk.BOTH, expand=True)
 
-    # Message entry field
     message_entry = tk.Entry(chat_window, width=50)
     message_entry.pack(pady=5, padx=10)
 
-    # Send message with timestamp
     def on_send_click():
         message = message_entry.get().strip()
         if message:
@@ -73,7 +68,6 @@ def open_chat_window():
             display_message(f"You: {message}")
             message_entry.delete(0, tk.END)
 
-    # Display message function
     def display_message(message):
         timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         chat_display.config(state="normal")
@@ -81,12 +75,12 @@ def open_chat_window():
         chat_display.config(state="disabled")
         chat_display.see(tk.END)
 
-    # Send button
     send_button = tk.Button(chat_window, text="Send", command=on_send_click)
     send_button.pack(pady=5)
 
-    # Start receiving messages from server
+    # Listen for messages from the server and display them
     start_receiving(display_message)
+
 
 
     

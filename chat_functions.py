@@ -2,8 +2,8 @@ import socket
 import threading
 
 # Server settings
-HOST = '127.0.0.1'  # Replace with server's IP address if needed
-PORT = 5000
+HOST = '10.33.155.108'  # Replace with server's IP address if needed
+PORT = 55271 
 
 # Client connection to the server
 client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
