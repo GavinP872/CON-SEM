@@ -1,58 +1,53 @@
 import socket
 import threading
 
-# Server configuration
-HOST = '10.33.155.108'  # Server address (localhost for testing)
-PORT = 55271        # Port to bind server
+clients = []  # List to store connected clients
 
-# List to store connected client sockets
-clients = []
-
-# Function to handle individual client communication
 def handle_client(client_socket, client_address):
-    print(f"New connection from {client_address}")
-    
-    while True:
+    print(f"Connection established with {client_address}")
+    while True:  # Keep the connection open for this client
         try:
-            # Receive message from client
-            message = client_socket.recv(1024).decode('utf-8')
-            if message:
-                print(f"Received (server): {message}")
-                # Broadcast the message to other connected clients
-                broadcast(message, client_socket)
-            else:
+            # Receive data from the client
+            message = client_socket.recv(1024).decode("utf-8")
+            if not message:  # Empty message means the client disconnected
+                print(f"Client {client_address} disconnected.")
                 break
-        except:  # Handle any errors (e.g., client disconnects unexpectedly)
+            print(f"Received from {client_address}: {message}")
+            
+            # Echo the message back to all connected clients
+            for sock in clients:
+                if sock != client_socket:  # Don't echo to the sender
+                    sock.sendall(f"From {client_address}: {message}".encode("utf-8"))
+        except ConnectionResetError:
+            print(f"Connection reset by {client_address}. Closing.")
             break
-    
-    # Remove client socket from the list and close connection
+        except Exception as e:
+            print(f"Error with {client_address}: {e}")
+            break
+
+    # Remove the client and close the socket
     clients.remove(client_socket)
     client_socket.close()
 
-# Function to send messages to all connected clients except the sender
+
 def broadcast(message, sender_socket):
     for client in clients:
-        if client != sender_socket:  # Skip the sender
+        if client != sender_socket:
             try:
                 client.send(message.encode('utf-8'))
-            except Exception as e:
-                print(f"Error broadcasting message: {e}")
+            except:
                 clients.remove(client)
 
-
-# Function to start the server and accept connections
-def start_server():
-    server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    server_socket.bind((HOST, PORT))  # Bind server to specified HOST and PORT
-    server_socket.listen(5)  # Allow up to 5 queued connections
-    print("Server started. Waiting for connections...")
-
+def accept_connections(server_socket):
     while True:
-        # Accept new client connection
         client_socket, client_address = server_socket.accept()
-        clients.append(client_socket)  # Add client socket to list
-        # Create a new thread to handle this client
-        thread = threading.Thread(target=handle_client, args=(client_socket, client_address))
-        thread.start()
+        print(f"Connection established with {client_address}")
+        clients.append(client_socket)
+        threading.Thread(target=handle_client, args=(client_socket,)).start()
 
-start_server()
+if __name__ == "__main__":
+    server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    server.bind(("10.33.155.108", 55271))
+    server.listen(5)
+    print("Server started. Waiting for connections...")
+    accept_connections(server)
