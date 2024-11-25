@@ -32,12 +32,13 @@ def handle_client(client_socket, client_address):
 # Function to send messages to all connected clients except the sender
 def broadcast(message, sender_socket):
     for client in clients:
-        if client != sender_socket:  # Avoid sending to the sender
+        if client != sender_socket:  # Skip the sender
             try:
                 client.send(message.encode('utf-8'))
-            except:
-                # Remove the client if unable to send message
+            except Exception as e:
+                print(f"Error broadcasting message: {e}")
                 clients.remove(client)
+
 
 # Function to start the server and accept connections
 def start_server():
