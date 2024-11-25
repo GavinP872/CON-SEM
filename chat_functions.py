@@ -16,7 +16,11 @@ def create_client():
 
 # Function to send messages to the server
 def send_message(client, msg):
-    client.send(msg.encode('utf-8'))
+    try:
+        client.send(msg.encode('utf-8'))
+    except Exception as e:
+        print(f"Error sending message: {e}")
+
     
 
 

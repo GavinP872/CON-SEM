@@ -68,11 +68,11 @@ def open_chat_window():
 
     # Function to update chat display with new messages
     def display_message(message):
-        timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         chat_display.config(state="normal")
-        chat_display.insert(tk.END, f"[{timestamp}] {message}\n")
+        chat_display.insert(tk.END, f"{message}\n")
         chat_display.config(state="disabled")
         chat_display.see(tk.END)
+
 
     # Function to send a message
     def on_send_click():
