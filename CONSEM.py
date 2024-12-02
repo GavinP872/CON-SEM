@@ -2,7 +2,6 @@ import tkinter as tk
 from tkinter import messagebox, PhotoImage
 from PIL import ImageTk, Image
 from datetime import datetime
-#from chat_functions import send_message, start_receiving, create_client
 from demoMessage import MessagingApp  # Import the MessagingApp class
 
 # Usernames and Passwords
@@ -74,20 +73,11 @@ def open_chat_window():
         chat_display.see(tk.END)
 
 
-    # Function to send a message
-    def on_send_click():
-        message = message_entry.get().strip()
-        if message:
-            send_message(client, message)  # Send the message via this user's client
-            display_message(f"You: {message}")  # Display sent message in chat
-            message_entry.delete(0, tk.END)
+    
 
-    # Send button
-    send_button = tk.Button(chat_window, text="Send", command=on_send_click)
-    send_button.pack(pady=5)
 
     # Start receiving messages for this user's client
-    start_receiving(client, display_message)
+    #start_receiving(client, display_message)
 
 
 

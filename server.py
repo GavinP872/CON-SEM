@@ -2,7 +2,7 @@ import socket
 import threading
 
 # Server configuration
-HOST = '10.33.179.104'  # Server's external IP
+HOST = '0.0.0.0'  # Server's external IP
 PORT = 443             # Selected available port
 
 

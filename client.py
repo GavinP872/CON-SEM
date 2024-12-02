@@ -7,7 +7,7 @@ HOST = '10.33.179.104'  # Server's external IP
 PORT = 443             # Selected available port
 
 
-NAME = "Jose"
+NAME = "Gavin: "
 # Receive messages from the server
 def receive_messages(client_socket):
     try:

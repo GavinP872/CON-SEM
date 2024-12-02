@@ -7,6 +7,7 @@ import textwrap
 import os
 import socket
 import threading
+from client import NAME
 
 
 class MessagingApp:
@@ -29,7 +30,7 @@ class MessagingApp:
         self.client_socket = None
         self.server_host = '10.33.179.104'
         self.server_port = 443
-        self.username = "Jose"
+        self.username = NAME
 
         # Data and state
         self.messages_data = {}
