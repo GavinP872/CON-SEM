@@ -1,10 +1,13 @@
 import socket
 import threading
 
-# Server configuration
-HOST = '10.33.155.108'  # Change to server IP
-PORT = 55271        # Server port
 
+# Server configuration
+HOST = '10.33.179.104'  # Server's external IP
+PORT = 443             # Selected available port
+
+
+NAME = "Jose"
 # Receive messages from the server
 def receive_messages(client_socket):
     try:
@@ -30,7 +33,7 @@ def start_client():
 
         # Send messages to the server
         while True:
-            message = input("You: ")
+            message = NAME + input()
             if message.lower() == "exit":
                 break
             client_socket.send(message.encode('utf-8'))
@@ -39,6 +42,8 @@ def start_client():
     finally:
         client_socket.close()
         print("Disconnected from the server.")
+
+
 
 if __name__ == "__main__":
     start_client()

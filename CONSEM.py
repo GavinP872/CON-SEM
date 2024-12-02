@@ -2,7 +2,7 @@ import tkinter as tk
 from tkinter import messagebox, PhotoImage
 from PIL import ImageTk, Image
 from datetime import datetime
-from chat_functions import send_message, start_receiving
+#from chat_functions import send_message, start_receiving, create_client
 from demoMessage import MessagingApp  # Import the MessagingApp class
 
 # Usernames and Passwords
@@ -56,7 +56,7 @@ def open_chat_window():
     chat_window.geometry("400x500")
 
     # Initialize a new client for this chat window
-    client = create_client()
+    #client = create_client()
 
     # Chat display
     chat_display = tk.Text(chat_window, state="disabled", wrap="word")
@@ -66,20 +66,23 @@ def open_chat_window():
     message_entry = tk.Entry(chat_window, width=50)
     message_entry.pack(pady=5, padx=10)
 
-    def on_send_click():
-        message = message_entry.get().strip()
-        if message:
-            send_message(message)
-            display_message(f"You: {message}")
-            message_entry.delete(0, tk.END)
-
+    # Function to update chat display with new messages
     def display_message(message):
-        timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         chat_display.config(state="normal")
-        chat_display.insert(tk.END, f"[{timestamp}] {message}\n")
+        chat_display.insert(tk.END, f"{message}\n")
         chat_display.config(state="disabled")
         chat_display.see(tk.END)
 
+
+    # Function to send a message
+    def on_send_click():
+        message = message_entry.get().strip()
+        if message:
+            send_message(client, message)  # Send the message via this user's client
+            display_message(f"You: {message}")  # Display sent message in chat
+            message_entry.delete(0, tk.END)
+
+    # Send button
     send_button = tk.Button(chat_window, text="Send", command=on_send_click)
     send_button.pack(pady=5)
 
@@ -145,7 +148,7 @@ def handle_twitter_button_press(event):
             tweet_text.pack(anchor="w")
 
             # Time and source of the tweet
-            time_label = tk.Label(tweet_info_frame, text=f"·{tweet['time']}", font=("Chirp", 10), bg="#e8f5fd", fg="#657786")
+            time_label = tk.Label(tweet_info_frame, text=f"Â·{tweet['time']}", font=("Chirp", 10), bg="#e8f5fd", fg="#657786")
             time_label.pack(anchor="w", pady=(0, 5))
 
             # Interaction buttons (like, reply, retweet, share)

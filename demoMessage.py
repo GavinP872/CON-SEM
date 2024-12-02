@@ -1,17 +1,20 @@
+
 from datetime import datetime
 import tkinter as tk
 from tkinter import ttk, filedialog
 from PIL import Image, ImageTk, ImageDraw
 import textwrap
 import os
+import socket
+import threading
 
 
 class MessagingApp:
     def __init__(self, root):
         self.root = root
         self.root.title("Messaging App")
-        self.root.state("zoomed")  # Open in fullscreen mode
-        self.light_mode = True  # Theme state
+        self.root.state("zoomed")
+        self.light_mode = True
         self.bg_light = "#FFF9E6"
         self.bg_dark = "#2C2C2C"
         self.text_light = "#000000"
@@ -21,6 +24,12 @@ class MessagingApp:
         self.secondary_light = "#C9C9C9"
         self.secondary_dark = "#404040"
         self.update_theme_colors()
+
+        # Networking variables
+        self.client_socket = None
+        self.server_host = '10.33.179.104'
+        self.server_port = 443
+        self.username = "Jose"
 
         # Data and state
         self.messages_data = {}
@@ -33,11 +42,13 @@ class MessagingApp:
         self.emoji_icon = self.load_image("IMG_SRC/emoji_icon.png", (50, 50))
         self.attachment_icon = self.load_image("IMG_SRC/attachment_icon.png", (50, 50))
 
+        # Setup networking
+        self.start_networking()
+
         # Setup UI components
         self.setup_ui()
 
     def update_theme_colors(self):
-        """Update theme colors dynamically based on light_mode state."""
         self.bg_color = self.bg_light if self.light_mode else self.bg_dark
         self.text_color = self.text_light if self.light_mode else self.text_dark
         self.primary_color = self.primary_light if self.light_mode else self.primary_dark
@@ -51,18 +62,39 @@ class MessagingApp:
             print(f"Error: {path} not found.")
             return None
 
+    def start_networking(self):
+        self.client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        try:
+            self.client_socket.connect((self.server_host, self.server_port))
+            print(f"Connected to the server at {self.server_host}:{self.server_port}")
+            threading.Thread(target=self.receive_messages, daemon=True).start()
+        except Exception as e:
+            print(f"Error connecting to server: {e}")
+            self.client_socket = None  # Prevent further operations if connection fails
+
+    def receive_messages(self):
+        try:
+            while True:
+                message = self.client_socket.recv(1024).decode('utf-8')
+                if message:
+                    self.display_message(message, sent_by_user=False)
+        except Exception as e:
+            print(f"Error receiving messages: {e}")
+        finally:
+            self.client_socket.close()
+
+    def send_network_message(self, message):
+        if self.client_socket:
+            try:
+                self.client_socket.send(f"{self.username}: {message}".encode('utf-8'))
+            except Exception as e:
+                print(f"Error sending message: {e}")
+
     def setup_ui(self):
-        """Reinitialize the UI for theme toggling."""
         for widget in self.root.winfo_children():
             widget.destroy()
-
-        # Friends list frame
         self.setup_friends_frame()
-
-        # Chat area frame
         self.setup_chat_frame()
-
-        # Input area
         self.setup_input_frame()
 
     def setup_friends_frame(self):
@@ -79,8 +111,7 @@ class MessagingApp:
         )
         friends_label.pack(pady=20)
 
-        # Add friends dynamically
-        friends_list = ["Jose", "Gavin", "Emmett"]
+        friends_list = ["Group Chat", "Jose", "Gavin", "Emmett"]
         for friend in friends_list:
             button = tk.Button(
                 self.friends_frame,
@@ -100,7 +131,6 @@ class MessagingApp:
             button.pack(fill="x", pady=10, padx=20)
             self.messages_data[friend] = []
 
-        # Add a dark mode toggle button
         theme_button = tk.Button(
             self.friends_frame,
             image=self.theme_icon,
@@ -113,7 +143,6 @@ class MessagingApp:
         theme_button.pack(pady=10)
 
     def toggle_theme(self):
-        """Toggle between light and dark modes."""
         self.light_mode = not self.light_mode
         self.update_theme_colors()
         self.update_theme_for_existing_ui()
@@ -153,7 +182,6 @@ class MessagingApp:
         self.chat_frame = tk.Frame(self.root, bg=self.bg_color)
         self.chat_frame.pack(side="right", fill="both", expand=True)
 
-        # Header
         self.header_frame = tk.Frame(self.chat_frame, bg=self.primary_color, height=50)
         self.header_frame.pack(fill="x")
         self.header_label = tk.Label(
@@ -165,11 +193,9 @@ class MessagingApp:
         )
         self.header_label.pack(pady=10)
 
-        # Chat area
         self.chat_area_frame = tk.Frame(self.chat_frame, bg=self.bg_color)
         self.chat_area_frame.pack(fill="both", expand=True, padx=10, pady=(10, 0))
 
-        # Chat log
         self.chat_log_canvas = tk.Canvas(self.chat_area_frame, bg=self.bg_color, highlightthickness=0)
         self.chat_log_inner = tk.Frame(self.chat_log_canvas, bg=self.bg_color)
         self.chat_scroll = ttk.Scrollbar(
@@ -177,22 +203,17 @@ class MessagingApp:
         )
         self.chat_log_canvas.configure(yscrollcommand=self.chat_scroll.set)
 
-        # Attach chat log inner frame to canvas
         self.chat_log_window = self.chat_log_canvas.create_window(
             (0, 0), window=self.chat_log_inner, anchor="nw"
         )
         self.chat_log_inner.bind(
             "<Configure>",
-            lambda e: self.chat_log_canvas.configure(
-                scrollregion=self.chat_log_canvas.bbox("all")
-            ),
+            lambda e: self.chat_log_canvas.configure(scrollregion=self.chat_log_canvas.bbox("all")),
         )
 
         self.chat_log_canvas.bind(
             "<Configure>",
-            lambda e: self.chat_log_canvas.itemconfig(
-                self.chat_log_window, width=e.width
-            ),
+            lambda e: self.chat_log_canvas.itemconfig(self.chat_log_window, width=e.width),
         )
 
         self.chat_log_canvas.pack(side="left", fill="both", expand=True)
@@ -202,7 +223,6 @@ class MessagingApp:
         self.input_frame = tk.Frame(self.chat_frame, bg=self.bg_color, height=50)
         self.input_frame.pack(fill="x", side="bottom", padx=10, pady=10)
 
-        # Input box
         self.EntryBox = tk.Text(
             self.input_frame,
             font=("Segoe UI", 13),
@@ -215,13 +235,10 @@ class MessagingApp:
         )
         self.EntryBox.pack(side="left", fill="x", expand=True, padx=(0, 10), pady=5)
         self.EntryBox.insert("1.0", "Type your message here...")
-
-        # Bind Enter key to send message
         self.EntryBox.bind("<FocusIn>", lambda event: self.clear_placeholder())
         self.EntryBox.bind("<FocusOut>", lambda event: self.add_placeholder())
         self.EntryBox.bind("<Return>", lambda event: (self.send_message(), "break"))
 
-        # Emoji picker button
         emoji_button = tk.Button(
             self.input_frame,
             image=self.emoji_icon,
@@ -231,7 +248,6 @@ class MessagingApp:
         )
         emoji_button.pack(side="right", padx=(10, 0))
 
-        # Attachment button
         attachment_button = tk.Button(
             self.input_frame,
             image=self.attachment_icon,
@@ -241,7 +257,6 @@ class MessagingApp:
         )
         attachment_button.pack(side="right", padx=(10, 0))
 
-        # Send button
         self.SendButton = tk.Button(
             self.input_frame,
             image=self.send_icon,
@@ -280,12 +295,11 @@ class MessagingApp:
         return ImageTk.PhotoImage(image)
 
     def pick_emoji(self):
-        """Open a pop-up emoji picker window."""
         emoji_window = tk.Toplevel(self.root)
         emoji_window.title("Pick an Emoji")
         emoji_window.geometry("300x200")
         emoji_window.resizable(False, False)
-        emoji_window.transient(self.root)  # Keep it on top of the main window
+        emoji_window.transient(self.root)
 
         emojis = [
             "😊", "😂", "😍", "😭", "😒",
@@ -294,15 +308,11 @@ class MessagingApp:
         ]
 
         def insert_emoji(emoji):
-            """Insert selected emoji into the EntryBox without triggering placeholder logic."""
-            # Temporarily disable the placeholder logic
             self.EntryBox.unbind("<FocusOut>")
             self.EntryBox.insert("insert", emoji)
-            # Re-enable the placeholder logic
             self.EntryBox.bind("<FocusOut>", lambda event: self.add_placeholder())
-            emoji_window.destroy()  # Close the emoji picker
+            emoji_window.destroy()
 
-        # Create a grid of emoji buttons
         for idx, emoji in enumerate(emojis):
             button = tk.Button(
                 emoji_window,
@@ -315,12 +325,9 @@ class MessagingApp:
             )
             button.grid(row=idx // 5, column=idx % 5, padx=10, pady=10)
 
-        # Center the emoji picker relative to the main window
         self.center_window(emoji_window)
 
-
     def center_window(self, window):
-        """Center a window relative to the main application."""
         window.update_idletasks()
         main_width = self.root.winfo_width()
         main_height = self.root.winfo_height()
@@ -348,11 +355,11 @@ class MessagingApp:
         message = self.EntryBox.get("1.0", "end-1c").strip()
         self.EntryBox.delete("1.0", tk.END)
         if message and self.current_friend:
-            self.messages_data[self.current_friend].append((message, True))
+            # Save message to the current friend's message list if not a duplicate
+            if (message, True) not in self.messages_data[self.current_friend]:
+                self.messages_data[self.current_friend].append((message, True))
             self.display_message(message, sent_by_user=True)
-            response = "This is a reply."
-            self.messages_data[self.current_friend].append((response, False))
-            self.display_message(response, sent_by_user=False)
+            self.send_network_message(message)
 
     def select_friend(self, friend):
         self.current_friend = friend
@@ -360,6 +367,11 @@ class MessagingApp:
         self.load_messages()
 
     def display_message(self, text, sent_by_user=True):
+        if self.current_friend:
+            # Avoid duplicates in the current friend's messages
+            if (text, sent_by_user) not in self.messages_data[self.current_friend]:
+                self.messages_data[self.current_friend].append((text, sent_by_user))
+
         bubble_frame = tk.Frame(self.chat_log_inner, bg=self.bg_color)
         bubble_frame.pack(fill="x", pady=5, padx=10, anchor="e" if sent_by_user else "w")
 
@@ -390,13 +402,15 @@ class MessagingApp:
         bubble_frame.pack(fill="x", pady=5, padx=10, anchor="e")
 
         label = tk.Label(bubble_frame, image=img, bg=self.bg_color)
-        label.image = img  # Keep a reference to avoid garbage collection
+        label.image = img
         label.pack(anchor="e")
 
     def load_messages(self):
         if self.current_friend in self.messages_data:
+            # Clear the chat area
             for widget in self.chat_log_inner.winfo_children():
                 widget.destroy()
+            # Load and display messages for the selected friend
             for msg, sent_by_user in self.messages_data[self.current_friend]:
                 if isinstance(msg, str):
                     self.display_message(msg, sent_by_user=sent_by_user)
@@ -404,8 +418,6 @@ class MessagingApp:
                     self.display_image(msg)
 
 
-# Run the app
-# Run the app only if this file is executed directly, not when imported
 if __name__ == "__main__":
     root = tk.Tk()
     app = MessagingApp(root)
