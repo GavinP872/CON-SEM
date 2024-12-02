@@ -4,31 +4,15 @@ import threading
 
 # Server settings
 HOST = '10.33.155.108'  # Replace with server's IP address if needed
-PORT =  55271
+PORT = 55271 
 
 # Client connection to the server
-def create_client():
-    try:
-        client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        client.connect((HOST, PORT))
-        return client
-    except Exception as e:
-        print(f"Error creating client: {e}")
-        return None
-
-
+client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+client.connect((HOST, PORT))
 
 # Function to send messages to the server
-def send_message(client, msg):
-    try:
-        if client:
-            client.send(msg.encode('utf-8'))
-        else:
-            print("Error: Client socket is not initialized.")
-    except Exception as e:
-        print(f"Error sending message: {e}")
-
-
+def send_message(msg):
+    client.send(msg.encode('utf-8'))
 
 # Function to receive messages from the server
 def receive_messages(client, on_message_callback):
