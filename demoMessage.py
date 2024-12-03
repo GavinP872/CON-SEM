@@ -8,7 +8,7 @@ import os
 import socket
 import threading
 from client import NAME
-
+import base64
 
 class MessagingApp:
     def __init__(self, root):
@@ -28,8 +28,8 @@ class MessagingApp:
 
         # Networking variables
         self.client_socket = None
-        self.server_host = '10.33.179.104'
-        self.server_port = 443
+        self.server_host = '10.187.122.195'
+        self.server_port = 50505
         self.username = NAME
 
         # Data and state
@@ -76,8 +76,15 @@ class MessagingApp:
     def receive_messages(self):
         try:
             while True:
-                message = self.client_socket.recv(1024).decode('utf-8')
-                if message:
+                message = self.client_socket.recv(4096).decode('utf-8')
+                print(f"Received message: {message}")  # Print received message to terminal
+                if message.startswith("IMAGE::"):
+                    encoded_image = message.split("::", 1)[1]
+                    image_data = base64.b64decode(encoded_image)
+                    with open("temp_image.jpg", "wb") as temp_file:
+                        temp_file.write(image_data)
+                    self.display_image("temp_image.jpg")
+                elif message:
                     self.display_message(message, sent_by_user=False)
         except Exception as e:
             print(f"Error receiving messages: {e}")
@@ -87,7 +94,8 @@ class MessagingApp:
     def send_network_message(self, message):
         if self.client_socket:
             try:
-                self.client_socket.send(f"{self.username}: {message}".encode('utf-8'))
+                self.client_socket.send(message.encode('utf-8'))
+                print(f"Network message sent: {message}")  # Print to terminal
             except Exception as e:
                 print(f"Error sending message: {e}")
 
@@ -347,10 +355,16 @@ class MessagingApp:
         if file_path:
             file_ext = os.path.splitext(file_path)[-1].lower()
             if file_ext in [".png", ".jpg", ".jpeg", ".gif"]:
+                with open(file_path, "rb") as image_file:
+                    encoded_image = base64.b64encode(image_file.read()).decode('utf-8')
+                # Send encoded image to the server
+                self.send_network_message(f"IMAGE::{encoded_image}")
                 self.display_image(file_path)
             else:
                 file_name = os.path.basename(file_path)
                 self.display_message(f"Sent a file: {file_name}", sent_by_user=True)
+                # Optionally send non-image files as well
+                self.send_network_message(f"FILE::{file_name}")
 
     def send_message(self):
         message = self.EntryBox.get("1.0", "end-1c").strip()

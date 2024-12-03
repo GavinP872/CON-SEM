@@ -7,10 +7,9 @@ from PIL import ImageTk, Image
 from datetime import datetime
 from demoMessage import MessagingApp  # Import the MessagingApp class
 
-
 # Usernames and Passwords
-admin_USERNAME = ["gavin", "jose", "benedict", "emmett", ""]
-admin_PASSWORD = ["gavin1", "jose1", "benedict1", "emmett1", ""]
+admin_USERNAME = ["gavin", "jose", "emmett", ""]
+admin_PASSWORD = ["gavin1", "jose1", "emmett1", ""]
 
 # Validate login
 def validate_login():
@@ -51,40 +50,6 @@ def handle_admin_button_press(event):
 
     # Initialize the MessagingApp inside the new window
     app = MessagingApp(admin_window)
-
-def open_chat_window():
-    # Create a new chat window
-    chat_window = tk.Toplevel(window)
-    chat_window.title("Chat")
-    chat_window.geometry("400x500")
-
-    # Initialize a new client for this chat window
-    #client = create_client()
-
-    # Chat display
-    chat_display = tk.Text(chat_window, state="disabled", wrap="word")
-    chat_display.pack(padx=10, pady=10, fill=tk.BOTH, expand=True)
-
-    # Input message box
-    message_entry = tk.Entry(chat_window, width=50)
-    message_entry.pack(pady=5, padx=10)
-
-    # Function to update chat display with new messages
-    def display_message(message):
-        chat_display.config(state="normal")
-        chat_display.insert(tk.END, f"{message}\n")
-        chat_display.config(state="disabled")
-        chat_display.see(tk.END)
-
-
-    
-
-
-    # Start receiving messages for this user's client
-    #start_receiving(client, display_message)
-
-
-
     
 # Open Twitter window
 def handle_twitter_button_press(event):
@@ -233,9 +198,9 @@ def handle_twitter_button_press(event):
     refresh_feed()  # Initial feed display
 
 # Load images for main window icons
-DesktopImage = ImageTk.PhotoImage(Image.open("IMG_SRC/R.jpg"))
+DesktopImage = ImageTk.PhotoImage(Image.open("IMG_SRC/102237.jpg"))
 panel = tk.Label(window, image=DesktopImage)
-panel.pack(side="bottom",  fill="both", expand="yes")
+panel.pack(side="bottom", fill="both", expand="yes")
 
 try:
     twitterIcon = PhotoImage(file="IMG_SRC/TWIT.png")
@@ -256,12 +221,12 @@ twitter_button.place(x=50, y=50, width=150, height=150)
 
 # Chat button setup
 chat_button = tk.Button(window, text=" ", image=chatIcon)
-chat_button.bind("<Button-1>", lambda e: open_chat_window())
-chat_button.place(x=50, y=250, width=150, height=150)
+chat_button.bind("<Button-1>", handle_admin_button_press)
+chat_button.place(x=50, y=250, width=152, height=152)
 
 # Admin tools button setup
 admin_button = tk.Button(window, text=" ", image=adminToolIcon)
-admin_button.bind("<Button-1>", handle_admin_button_press)
+admin_button.bind()
 admin_button.place(x=50, y=450, width=150, height=150)
 
 # Close button setup
@@ -292,22 +257,7 @@ entry_password.pack(pady=5)
 tk.Button(login_window, text="Login", command=validate_login).pack(pady=20)
 
 
-
-#
-#
-#
-#
-#CLOCK
-#
-#
-#
-#
-
-
-
-
-
-
+## Clock
 def time():
     string = strftime('%H:%M:%S %p')
     lbl.config(text=string)
@@ -326,8 +276,6 @@ lbl = Label(window, font=('Segoe UI', 40, "bold"),
 lbl.tkraise()
 lbl.place(x=(window.winfo_width() - 314), y=(window.winfo_height() - 70))
 time()
-
-
 
 
 # Start the GUI event loop
