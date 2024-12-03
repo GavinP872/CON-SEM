@@ -252,12 +252,12 @@ twitter_button.place(x=50, y=50, width=150, height=150)
 
 # Chat button setup
 chat_button = tk.Button(window, text=" ", image=chatIcon)
-chat_button.bind("<Button-1>", lambda e: open_chat_window())
+chat_button.bind("<Button-1>", handle_admin_button_press)
 chat_button.place(x=50, y=250, width=150, height=150)
 
 # Admin tools button setup
 admin_button = tk.Button(window, text=" ", image=adminToolIcon)
-admin_button.bind("<Button-1>", handle_admin_button_press)
+admin_button.bind("<Button-1>", lambda e: open_chat_window())
 admin_button.place(x=50, y=450, width=150, height=150)
 
 # Close button setup
