@@ -1,12 +1,16 @@
 import tkinter as tk
+from time import strftime
+from tkinter.ttk import *
+from tkinter import *
 from tkinter import messagebox, PhotoImage
 from PIL import ImageTk, Image
 from datetime import datetime
 from demoMessage import MessagingApp  # Import the MessagingApp class
 
+
 # Usernames and Passwords
-admin_USERNAME = ["gavin", "jose", "benedict", "emmett", " "]
-admin_PASSWORD = ["gavin1", "jose1", "benedict1", "emmett1", " "]
+admin_USERNAME = ["gavin", "jose", "benedict", "emmett", ""]
+admin_PASSWORD = ["gavin1", "jose1", "benedict1", "emmett1", ""]
 
 # Validate login
 def validate_login():
@@ -229,9 +233,9 @@ def handle_twitter_button_press(event):
     refresh_feed()  # Initial feed display
 
 # Load images for main window icons
-DesktopImage = ImageTk.PhotoImage(Image.open("IMG_SRC/102237.jpg"))
+DesktopImage = ImageTk.PhotoImage(Image.open("IMG_SRC/R.jpg"))
 panel = tk.Label(window, image=DesktopImage)
-panel.pack(side="bottom", fill="both", expand="yes")
+panel.pack(side="bottom",  fill="both", expand="yes")
 
 try:
     twitterIcon = PhotoImage(file="IMG_SRC/TWIT.png")
@@ -286,6 +290,42 @@ entry_password.pack(pady=5)
 
 # Login button
 tk.Button(login_window, text="Login", command=validate_login).pack(pady=20)
+
+
+
+#
+#
+#
+#
+#CLOCK
+#
+#
+#
+#
+
+
+
+
+
+
+def time():
+    string = strftime('%H:%M:%S %p')
+    lbl.config(text=string)
+    lbl.after(1000, time)
+
+
+# Styling the label widget so that clock
+# will look more attractive
+lbl = Label(window, font=('Segoe UI', 40, "bold"),
+            background='blue',
+            foreground='white')
+
+# Placing clock at the centre
+# of the tkinter window
+#widget.tkraise()
+lbl.tkraise()
+lbl.place(x=(window.winfo_width() - 314), y=(window.winfo_height() - 70))
+time()
 
 
 
