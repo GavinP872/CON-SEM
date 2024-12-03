@@ -2,8 +2,8 @@ import socket
 import threading
 
 # Server configuration
-HOST = '10.187.122.195'  # Server's external IP
-PORT = 50505             # Selected available port
+HOST = '10.33.179.104'  # Server's external IP
+PORT = 53466             # Selected available port
 
 
 # List to store connected clients

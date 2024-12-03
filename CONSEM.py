@@ -7,9 +7,12 @@ from PIL import ImageTk, Image
 from datetime import datetime
 from demoMessage import MessagingApp  # Import the MessagingApp class
 
+
+
 # Usernames and Passwords
 admin_USERNAME = ["gavin", "jose", "emmett", ""]
 admin_PASSWORD = ["gavin1", "jose1", "emmett1", ""]
+
 
 # Validate login
 def validate_login():
@@ -201,6 +204,26 @@ def handle_twitter_button_press(event):
 DesktopImage = ImageTk.PhotoImage(Image.open("IMG_SRC/102237.jpg"))
 panel = tk.Label(window, image=DesktopImage)
 panel.pack(side="bottom", fill="both", expand="yes")
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 try:
     twitterIcon = PhotoImage(file="IMG_SRC/TWIT.png")

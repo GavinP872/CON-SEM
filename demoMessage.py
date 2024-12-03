@@ -10,6 +10,8 @@ import threading
 from client import NAME
 import base64
 
+NAME = "Mr.Bob: "
+
 class MessagingApp:
     def __init__(self, root):
         self.root = root
@@ -28,8 +30,8 @@ class MessagingApp:
 
         # Networking variables
         self.client_socket = None
-        self.server_host = '10.187.122.195'
-        self.server_port = 50505
+        self.server_host = '10.33.179.104' 
+        self.server_port =  53466   
         self.username = NAME
 
         # Data and state
@@ -374,7 +376,7 @@ class MessagingApp:
             if (message, True) not in self.messages_data[self.current_friend]:
                 self.messages_data[self.current_friend].append((message, True))
             self.display_message(message, sent_by_user=True)
-            self.send_network_message(message)
+            self.send_network_message(NAME + message)
 
     def select_friend(self, friend):
         self.current_friend = friend
